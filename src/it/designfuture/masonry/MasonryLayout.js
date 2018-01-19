@@ -32,6 +32,7 @@ sap.ui.define([
 var MasonryLayout = Control.extend("it.designfuture.masonry.MasonryLayout", /** @lends it.designfuture.masonry.MasonryLayout prototype */ { 
     
     __msnry: undefined,
+    __imgLoad: undefined,
     
     metadata : {
         library: 'it.designfuture.masonry',
@@ -121,8 +122,7 @@ var MasonryLayout = Control.extend("it.designfuture.masonry.MasonryLayout", /** 
              * Enables layout on initialization. Enabled by default initLayout: true.
              * Set initLayout: false to disable layout on initialization, so you can use methods or add events before the initial layout.
              */
-            initLayout : {type : "boolean", group : "Appearance", defaultValue : true},
-
+            initLayout : {type : "boolean", group : "Appearance", defaultValue : true}
             
         },
 		defaultAggregation : "content",
@@ -168,6 +168,64 @@ var MasonryLayout = Control.extend("it.designfuture.masonry.MasonryLayout", /** 
                 }
             },
             
+            /**
+             * Triggered after all images have been either loaded or confirmed broken.
+             */
+            imageLoadedAlways: {
+                parameters: {
+                    /**
+                     * The imagesLoaded instance
+                     */
+                    instance: { type: "object" }
+                }
+            },
+            
+            /**
+             * Triggered after all images have successfully loaded without any broken images.
+             */
+            imageLoadedDone: {
+                parameters: {
+                    /**
+                     * The imagesLoaded instance
+                     */
+                    instance: { type: "object" }
+                }
+            },
+            
+            /**
+             * Triggered after all images have been loaded with at least one broken image.
+             */
+            imageLoadedFail: {
+                parameters: {
+                    /**
+                     * The imagesLoaded instance
+                     */
+                    instance: { type: "object" }
+                }
+            },
+            
+            /**
+             * Triggered after each image has been loaded.
+             */
+            imageLoadedProgress: {
+                parameters: {
+                    /**
+                     * The imagesLoaded instance
+                     */
+                    image: { type: "object" },
+                    
+                    /**
+                     * The imagesLoaded instance
+                     */
+                    loaded: { type: "boolean" },
+                    
+                    /**
+                     * The imagesLoaded instance
+                     */
+                    insloadedtance: { type: "object" }
+                }
+            },
+
         }
     }, 
     
@@ -180,23 +238,47 @@ var MasonryLayout = Control.extend("it.designfuture.masonry.MasonryLayout", /** 
     },
     
     ////////////////////////////////////////////////////
-    //	METHODS
+    //	INTERNAL METHODS
     ////////////////////////////////////////////////////
     
+    /**
+     * Init library
+     * @private
+     */
     initImageLoader: function(waitAllImages) {
         var that = this;
-        if ( waitAllImages ) {
-            imagesLoaded( '.openui5-masonry', function() {
-                that.initMasonry();
-            });
-        } else {
-            that.initMasonry();
-            imagesLoaded( '.openui5-masonry', function() {
-                that.__msnry.layout();
-            });
+        if ( !waitAllImages ) {
+            this.initMasonry();
         }
+
+        this.__imgLoad = imagesLoaded( '.openui5-masonry' );
+        this.__imgLoad.on( 'always', function( instance ) {
+            that.fireImageLoadedAlways({instance: instance});
+            if ( waitAllImages ) {
+                that.initMasonry();
+            } else {
+                that.__msnry.layout();
+            }
+        });
+
+        this.__imgLoad.on( 'done', function( instance ) {
+            that.fireImageLoadedDone({instance: instance});
+        });
+
+        this.__imgLoad.on( 'fail', function( instance ) {
+            that.fireImageLoadedFail({instance: instance});
+        });
+
+        this.__imgLoad.on( 'progress', function( instance, image ) {
+            that.fireImageLoadedProgress({image: image, loaded: image.isLoaded, instance: instance});
+        });
+
     },
 
+    /**
+     * Init Masonry library
+     * @private
+     */
     initMasonry: function() {
         var that = this;
         this.__msnry = new Masonry( ".openui5-masonry", {
@@ -222,6 +304,131 @@ var MasonryLayout = Control.extend("it.designfuture.masonry.MasonryLayout", /** 
         this.__msnry.on('removeComplete', function(removedItems) {
             that.fireRemoveComplete({removedItems: removedItems, instance: that.__msnry});
         });
+    },
+    
+    ////////////////////////////////////////////////////
+    //	MASONRY METHODS
+    ////////////////////////////////////////////////////
+    
+    /**
+     * Lays out all item elements. layout is useful when an item has changed size, and all items need to be laid out again.
+     * @public
+     */
+    masonryLayout: function() {
+        if ( this.__msnry ) {
+            this.__msnry.layout();
+        }
+    },
+    
+    /**
+     * Lays out specified items.
+     * @public
+     * @param {array} items Array of Masonry.Items
+     * @param {boolean} isStill Disables transitions
+     */
+    masonryLayoutItems: function(items, isStill) {
+        if ( this.__msnry ) {
+            this.__msnry.layoutItems(items, isStill);
+        }
+    },
+    
+    /**
+     * Stamps elements in the layout. Masonry will lay out item elements around stamped elements.
+     * @public
+     * @param {object} elements Element, jQuery Object, NodeList, or Array of Elements
+     */
+    masonryStamp: function(elements) {
+        if ( this.__msnry ) {
+            this.__msnry.stamp( elements );
+        }
+    },
+    
+    /**
+     * Un-stamps elements in the layout, so that Masonry will no longer layout item elements around them. See demo above.
+     * @public
+     * @param {object} elements Element, jQuery Object, NodeList, or Array of Elements
+     */
+    masonryUnstamp: function(elements) {
+        if ( this.__msnry ) {
+            this.__msnry.unstamp( elements );
+        }
+    },
+    
+    /**
+     * Adds and lays out newly appended item elements to the end of the layout.
+     * @public
+     * @param {object} elements Element, jQuery Object, NodeList, or Array of Elements
+     */
+    masonryAppended: function(elements) {
+        if ( this.__msnry ) {
+            this.__msnry.appended( elements );
+        }
+    },
+    
+    /**
+     * Adds and lays out newly prepended item elements at the beginning of layout.
+     * @public
+     * @param {object} elements Element, jQuery Object, NodeList, or Array of Elements
+     */
+    masonryPrepended: function(elements) {
+        if ( this.__msnry ) {
+            this.__msnry.prepended( elements );
+        }
+    },
+    
+    /**
+     * Adds item elements to the Masonry instance. addItems does not lay out items like appended or prepended.
+     * @public
+     * @param {object} elements Element, jQuery Object, NodeList, or Array of Elements
+     */
+    masonryAddItems: function(elements) {
+        if ( this.__msnry ) {
+            this.__msnry.addItems( elements );
+        }
+    },
+    
+    /**
+     * Removes elements from the Masonry instance and DOM.
+     * @public
+     * @param {object} elements Element, jQuery Object, NodeList, or Array of Elements
+     */
+    masonryRemoveItems: function(elements) {
+        if ( this.__msnry ) {
+            this.__msnry.remove( elements );
+        }
+    },
+    
+    /**
+     * Recollects all item elements. For frameworks like Angular and React, reloadItems may be useful to apply changes to the DOM to Masonry.
+     * @public
+     */
+    masonryReloadItems: function() {
+        if ( this.__msnry ) {
+            this.__msnry.reloadItems();
+        }
+    },
+    
+    /**
+     * Removes the Masonry functionality completely. destroy will return the element back to its pre-initialized state.
+     * @public
+     */
+    masonryDestroy: function() {
+        if ( this.__msnry ) {
+            this.__msnry.destroy();
+        }
+    },
+    
+    /**
+     * Returns an array of item elements.
+     * @public
+     * @returns {array} Array of Elements
+     */
+    masonryGetItemElements: function() {
+        if ( this.__msnry ) {
+            return this.__msnry.getItemElements();
+        } else {
+            return null;
+        }
     },
     
     ////////////////////////////////////////////////////
@@ -255,7 +462,9 @@ MasonryLayout.prototype.exit = function() {
         // this.__msnry.off( 'layoutComplete', this.onLayoutComplete);
         // this.__msnry.off( 'removeComplete', this.onRemoveComplete);
     }
+    this.__msnry.destroy();
     this.__msnry = undefined;
+    this.__imgLoad = undefined;
 };
 
 return MasonryLayout;
