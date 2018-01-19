@@ -5,7 +5,7 @@ html { overflow-y: scroll; }
 
 body { font-family: sans-serif; }
 
-/* ---- openui5-masonry ---- */
+/* ---- grid ---- */
 
 .openui5-masonry {
   background: #DDD;
@@ -20,16 +20,16 @@ body { font-family: sans-serif; }
 
 /* ---- .grid-item ---- */
 
-.grid-sizer,
-.grid-item {
+.openui5-masonry-grid-sizer,
+.openui5-masonry-grid-item {
   width: 33.333%;
 }
 
-.grid-item {
+.openui5-masonry-grid-item {
   float: left;
 }
 
-.grid-item img {
+.openui5-masonry-grid-item img {
   display: block;
   max-width: 100%;
 }

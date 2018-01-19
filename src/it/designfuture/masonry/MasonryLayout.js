@@ -46,7 +46,7 @@ var MasonryLayout = Control.extend("it.designfuture.masonry.MasonryLayout", /** 
             /**
              * Specifies which child elements will be used as item elements in the layout.
              */
-            itemSelector : {type : "string", group : "Appearance", defaultValue : ".grid-item"},
+            itemSelector : {type : "string", group : "Appearance", defaultValue : ".openui5-masonry-grid-item"},
             
             /**
              * Aligns items to a horizontal grid. Use element sizing for responsive layouts with percentage widths. Set columnWidth to an Element or 
@@ -271,6 +271,7 @@ var MasonryLayout = Control.extend("it.designfuture.masonry.MasonryLayout", /** 
 
         this.__imgLoad.on( 'progress', function( instance, image ) {
             that.fireImageLoadedProgress({image: image, loaded: image.isLoaded, instance: instance});
+            that.__msnry.layout();
         });
 
     },
@@ -284,18 +285,19 @@ var MasonryLayout = Control.extend("it.designfuture.masonry.MasonryLayout", /** 
         this.__msnry = new Masonry( ".openui5-masonry", {
             itemSelector : this.getItemSelector(),
             columnWidth : this.getColumnWidth(),
-            gutter : this.getGutter(),
-            horizontalOrder : this.getHorizontalOrder(),
-            percentPosition : this.getPercentPosition(),
-            stamp : this.getStamp(),
-            fitWidth : this.getFitWidth(),
-            originLeft : this.getOriginLeft(),
-            originTop : this.getOriginTop(),
-            containerStyle : this.getContainerStyle(),
-            transitionDuration : this.getTransitionDuration(),
-            stagger : this.getStagger(),
-            resize : this.getResize(),
-            initLayout : this.getInitLayout()
+            percentPosition : true
+            // gutter : this.getGutter(),
+            // horizontalOrder : this.getHorizontalOrder(),
+            // percentPosition : this.getPercentPosition(),
+            // stamp : this.getStamp(),
+            // fitWidth : this.getFitWidth(),
+            // originLeft : this.getOriginLeft(),
+            // originTop : this.getOriginTop(),
+            // containerStyle : this.getContainerStyle(),
+            // transitionDuration : this.getTransitionDuration(),
+            // stagger : this.getStagger(),
+            // resize : this.getResize(),
+            // initLayout : this.getInitLayout()
         });
 
         this.__msnry.on('layoutComplete', function(laidOutItems) {

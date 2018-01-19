@@ -32,10 +32,17 @@ sap.ui.define(['jquery.sap.global'],
 		oRm.addClass("openui5-masonry");
 		oRm.writeClasses();
 		oRm.write(">");
+
+		// Print div for grid-sizer utility
+		oRm.write("<div");
+		oRm.addClass("openui5-masonry-grid-sizer");
+		oRm.writeClasses();
+		oRm.write("></div>");
+
 		var aItems = oControl.getContent();
 		for ( var i = 0; i < aItems.length; i++) { // loop over all child controls
             oRm.write("<div");
-		    oRm.addClass("grid-item");
+		    oRm.addClass("openui5-masonry-grid-item");
 			oRm.writeClasses();
 			oRm.write(">");
 			oRm.renderControl(aItems[i]);
