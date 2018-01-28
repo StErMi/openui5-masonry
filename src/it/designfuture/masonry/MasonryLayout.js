@@ -129,7 +129,7 @@ var MasonryLayout = Control.extend("it.designfuture.masonry.MasonryLayout", /** 
 		aggregations : {
 
 			/**
-			 * Controls that are placed into Grid layout.
+			 * Controls that are placed into layout.
 			 */
 			content : {type : "sap.ui.core.Control", multiple : true, singularName : "content"}
 		},
